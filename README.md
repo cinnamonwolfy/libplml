@@ -9,8 +9,8 @@ the parser once that gets posted
 
 # Build Instructions
 
-Currently there is no functioning build system, but in the next release there
-will be
+Currently there is no functioning build system, but in the next few commits,
+there will be
 
 # Contributions
 
