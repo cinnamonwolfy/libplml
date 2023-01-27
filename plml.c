@@ -29,8 +29,28 @@ void plMLError(string_t name, int errNum, plmt_t* mt){
 	exit(errNum);
 }
 
+plarray_t* plMLSanitize(string_t string, plmt_t* mt){
+	plarray_t* retArr = plParser(string, mt);
+	string_t* retStrArr = retArr->array;
+
+	int i = 0;
+	while(i < retArr->size){
+		if(strchr(retStrArr[i], '#') == retStrArr[i]){
+			int j = i;
+			while(i < retArr->size){
+				plMTFree(mt, retStrArr[i]);
+				i++;
+			}
+			retArr->size = j;
+		}
+		i++;
+	}
+
+	return retArr;
+}
+
 plmltoken_t* plMLParse(string_t string, plmt_t* mt){
-	plarray_t* tokenizedStr = plParser(string, mt);
+	plarray_t* tokenizedStr = plMLSanitize(string, mt);
 	if(tokenizedStr->size != 3 && tokenizedStr->size != 1)
 		plMLError("plMLParse", PLML_INVALID, mt);
 
@@ -86,6 +106,20 @@ plmltoken_t* plMLParse(string_t string, plmt_t* mt){
 
 	plMTFreeArray(tokenizedStr, true);
 	return returnToken;
+}
+
+void plMLGetTokenAttrib(plmltoken_t* token, memptr_t ptr, int attribType){
+	switch(attribType){
+		case PLML_GET_NAME:
+			*((string_t*)ptr) = token->name;
+			break;
+		case PLML_GET_TYPE:
+			*((int*)ptr) = token->type;
+			break;
+		case PLML_GET_VALUE:
+			*((memptr_t*)ptr) = token->value;
+			break;
+	}
 }
 
 void plMLFreeToken(plmltoken_t* token){
