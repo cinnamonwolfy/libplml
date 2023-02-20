@@ -1,6 +1,7 @@
 #!/bin/sh
 CC="cc"
 CFLAGS="-std=c99"
+
 AR="ar"
 RANLIB="ranlib"
 prefix="/usr/local"
@@ -73,6 +74,10 @@ generate_config(){
 		fi
 	else
 		echo "$CC"
+	fi
+	echo "Compiler flags set...$CFLAGS"
+	if [ "$LDFLAGS" != "" ]; then
+		echo "Linker flags set...$LDFLAGS"
 	fi
 
 	compile_config_str="CC=\"$CC\"\nCFLAGS=\"$CFLAGS\"\nAR=\"$AR\"\nRANLIB=\"$RANLIB\"\n"
@@ -163,7 +168,7 @@ while [ $# -ne 0 ]; do
 			fi
 			;;
 		--help | --*)
-			printf "PocketLinux32's Generic C99 Configure System v0.03\n\n"
+			printf "PocketLinux32's Generic C99 Configure System v0.04\n\n"
 			printf "Usage: $0 [OPTIONS]...\n\n"
 			echo "Install Options"
 			echo "--prefix=DIR			Set install path (default=/usr/local)"
@@ -181,6 +186,7 @@ while [ $# -ne 0 ]; do
 			printf "\nInfluential Environment Variables\n"
 			echo "  CC				C compiler"
 			echo "  CFLAGS			Flags passed to the C compiler"
+			echo "  LDFLAGS			FLags passed to the linker"
 			echo "  AR				Archival tool for creating static libraries"
 			echo "  RANLIB			Like AR, but indexes symbols in an AR archive"
 			exit 0
@@ -189,7 +195,10 @@ while [ $# -ne 0 ]; do
 			CC=$(echo $1 | cut -d= -f2)
 			;;
 		CFLAGS=*)
-			CFLAGS="$CFLAGS $(echo $1 | cut -d= -f2)"
+			CFLAGS="$CFLAGS $(echo $1 | cut -d= -f2-)"
+			;;
+		LDFLAGS=*)
+			LDFLAGS="$(echo $1 | cut -d= -f2-)"
 			;;
 		AR=*)
 			AR=$(echo $1 | cut -d= -f2)
