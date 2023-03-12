@@ -107,9 +107,9 @@ compile_lib(){
 install_lib(){
 	printf "Installing library $libname..."
 	for i in $(ls include | grep ".h"); do
-		cp include/$i "$prefix/include"
+		cp include/$i "$includedir"
 	done
-	mv lib$libname.* "$prefix/lib"
+	mv lib$libname.* "$libdir"
 	echo "Done."
 }
 
