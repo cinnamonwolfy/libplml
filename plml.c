@@ -7,11 +7,11 @@ struct plmltoken {
 	plmt_t* mt;
 };
 
-void plMLError(string_t name, int errNum, plmt_t* mt){
+void plMLError(string_t name, plmlerror_t errVal, plmt_t* mt){
 	printf("%s: ", name);
 
-	switch(errNum){
-		case 0:
+	switch(errVal){
+		case PLML_SUCCESS:
 			printf("Success\n");
 			return;
 		case PLML_FILE:
@@ -26,7 +26,7 @@ void plMLError(string_t name, int errNum, plmt_t* mt){
 	}
 
 	plMTStop(mt);
-	exit(errNum);
+	exit(errVal);
 }
 
 plarray_t* plMLSanitize(string_t string, plmt_t* mt){
@@ -108,7 +108,7 @@ plmltoken_t* plMLParse(string_t string, plmt_t* mt){
 	return returnToken;
 }
 
-void plMLGetTokenAttrib(plmltoken_t* token, memptr_t ptr, int attribType){
+void plMLGetTokenAttrib(plmltoken_t* token, memptr_t ptr, plmlaction_t attribType){
 	switch(attribType){
 		case PLML_GET_NAME:
 			*((string_t*)ptr) = token->name;
