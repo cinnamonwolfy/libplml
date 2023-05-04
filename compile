@@ -34,6 +34,12 @@ _parse_projectstruct(){
 	elif [ "$project_type" = "exec" ]; then
 		progname=$(echo "$1" | cut -d'|' -f2)
 		srcdir=$(echo "$1" | cut -d'|' -f3)
+		linkflags=$(echo "$1" | cut -d'|' -f4 | sed 's/,/\ /g')
+		prog_no_install=$(echo "$1" | cut -d'|' -f5)
+	fi
+
+	if [ "$linkflags" = "''" ]; then
+		linkflags=""
 	fi
 
 	if [ "$srcdir" = "" ]; then
@@ -101,8 +107,8 @@ compile_shared_lib(){
 }
 
 compile_prog(){
-	printf "Compiling program $progname..."
-	$CC $progname.c -Iinclude -L. -l$libname $CFLAGS $LDFLAGS -o $progname
+	printf "Compiling program $srcdir/$progname..."
+	$CC $srcdir/$progname.c -Iinclude -L. $linkflags $CFLAGS -o $progname
 	echo "Done."
 }
 
@@ -116,8 +122,25 @@ install_lib(){
 }
 
 install_prog(){
+	if [ "$prog_no_install" != "" ]; then
+		echo "Skipping $progname"
+		return
+	fi
+
 	printf "Installing program $progname..."
 	mv $progname "$bindir"
+	echo "Done."
+}
+
+clean_lib(){
+	printf "Cleaning library $libname..."
+	rm -f lib$libname.*
+	echo "Done."
+}
+
+clean_prog(){
+	printf "Cleaning program $progname..."
+	rm -f $progname
 	echo "Done."
 }
 
@@ -165,21 +188,32 @@ install_project(){
 	fi
 }
 
-printf "PocketLinux32's Generic C Build System v0.02\n\n"
+clean_project(){
+	if [ "$1" = "" ]; then
+		internal_action="lib"
+	else
+		internal_action="$1"
+	fi
+
+	if [ $internal_action = "lib" ]; then
+		clean_lib
+	fi
+
+	if [ $internal_action = "prog" ]; then
+		clean_prog
+	fi
+}
+
+printf "PocketLinux32's Generic C Build System v0.03\n\n"
 
 if [ $# -lt 1 ]; then
-	echo "Error: Not enough arguments"
-	exit
+	echo "Error: Not enough arguments. Please run $0 help to see all of the valid options and try again"
+	exit 1
 fi
 
 case $1 in
 	clean)
-		rm obj *.out *.a *.so core* -rf
-		if [ "$2" = "fully" ]; then
-			rm .config
-		fi
-		echo "Project directory has been cleaned"
-		exit 0
+		action="clean_project"
 		;;
 	build)
 		action="build_project"
@@ -193,6 +227,9 @@ case $1 in
 		echo "install		Installs the compiled library to dest"
 		exit 0
 		;;
+	*)
+		echo "Error: Unrecognized option. Please run $0 help to see all of the valid options and try again"
+		exit 1
 esac
 
 if [ ! -f ".config" ]; then
@@ -223,6 +260,13 @@ for i in $main_project; do
 		fi
 	fi
 done
+
+if [ "$action" = "clean_project" ]; then
+	rm -rf obj core*
+	if [ "$2" = "fully" ]; then
+		rm -f .config
+	fi
+fi
 
 for i in $lib_projectstruct; do
 	_parse_projectstruct $i
