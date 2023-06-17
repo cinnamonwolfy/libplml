@@ -14,9 +14,6 @@ void plMLError(string_t name, plmlerror_t errVal, plmt_t* mt){
 		case PLML_SUCCESS:
 			printf("Success\n");
 			return;
-		case PLML_FILE:
-			printf("Couldn't open file\n");
-			break;
 		case PLML_INVALID:
 			printf("Invalid token\n");
 			break;
@@ -70,15 +67,23 @@ plmltoken_t* plMLParse(string_t string, plmt_t* mt){
 			string_t leftoverStr = NULL;
 			int tempInt = strtol(tokenizedStrArr[2], &leftoverStr, 10);
 			if(leftoverStr != NULL && *leftoverStr != '\0'){
-				returnToken->type = PLML_TYPE_BOOL;
-				returnToken->value = plMTAllocE(mt, sizeof(bool));
+				leftoverStr = NULL;
+				double tempFloat = strtod(tokenizedStrArr[2], &leftoverStr);
+				if(leftoverStr != NULL && *leftoverStr != '\0'){
+					returnToken->type = PLML_TYPE_BOOL;
+					returnToken->value = plMTAllocE(mt, sizeof(bool));
 
-				if(strcmp(tokenizedStrArr[2], "true") == 0)
-					*((bool*)returnToken->value) = true;
-				else if(strcmp(tokenizedStrArr[2], "false") == 0)
-					*((bool*)returnToken->value) = false;
-				else
-					plMLError("plMLParse", PLML_INVALID, mt);
+					if(strcmp(tokenizedStrArr[2], "true") == 0)
+						*((bool*)returnToken->value) = true;
+					else if(strcmp(tokenizedStrArr[2], "false") == 0)
+						*((bool*)returnToken->value) = false;
+					else
+						plMLError("plMLParse", PLML_INVALID, mt);
+				}else{
+					returnToken->type = PLML_TYPE_FLOAT;
+					returnToken->value = plMTAllocE(mt, sizeof(double));
+					memcpy(returnToken->value, &tempFloat, sizeof(double));
+				}
 			}else{
 				returnToken->type = PLML_TYPE_INT;
 				returnToken->value = plMTAllocE(mt, sizeof(int));
@@ -89,7 +94,7 @@ plmltoken_t* plMLParse(string_t string, plmt_t* mt){
 			returnToken->value = plMTAllocE(mt, strlen(tokenizedStrArr[2]) + 1);
 			strcpy(returnToken->value, tokenizedStrArr[2]);
 		}
-	}else{
+	}else if(tokenizedStr->size == 1){
 		returnToken->type = PLML_TYPE_HEADER;
 		returnToken->value = NULL;
 
@@ -102,6 +107,8 @@ plmltoken_t* plMLParse(string_t string, plmt_t* mt){
 
 		returnToken->name = plMTAllocE(mt, nameSize + 1);
 		memcpy(returnToken->name, headerStart, nameSize);
+	}else{
+		plMLError("plMLParse", PLML_INVALID, mt);
 	}
 
 	plMTFreeArray(tokenizedStr, true);

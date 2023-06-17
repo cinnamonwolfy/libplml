@@ -3,22 +3,22 @@
 #include <pl32.h>
 
 typedef enum plmlerror {
-    PLML_SUCCESS,
-    PLML_FILE,
-    PLML_INVALID,
+	PLML_SUCCESS,
+	PLML_INVALID,
 } plmlerror_t;
 
 typedef enum plmltype {
-    PLML_TYPE_STRING,
-    PLML_TYPE_BOOL,
-    PLML_TYPE_INT,
-    PLML_TYPE_HEADER,
+	PLML_TYPE_STRING,
+	PLML_TYPE_BOOL,
+	PLML_TYPE_INT,
+	PLML_TYPE_HEADER,
+	PLML_TYPE_FLOAT
 } plmltype_t;
 
 typedef enum plmlaction {
-    PLML_GET_NAME,
-    PLML_GET_TYPE,
-    PLML_GET_VALUE,
+	PLML_GET_NAME,
+	PLML_GET_TYPE,
+	PLML_GET_VALUE,
 } plmlaction_t;
 
 typedef struct plmltoken plmltoken_t;

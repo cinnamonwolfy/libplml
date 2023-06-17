@@ -12,9 +12,6 @@ int main(int argc, string_t argv[]){
 	plfile_t* fileToParse = plFOpen(argv[1], "r", mt);
 	char lineBuffer[4096];
 
-	if(fileToParse == NULL)
-		plMLError("plFOpen", PLML_FILE, mt);
-
 	int i = 1;
 	while(plFGets(lineBuffer, 4095, fileToParse) != NULL){
 		plmltoken_t* parsedToken = plMLParse(lineBuffer, mt);
@@ -50,6 +47,9 @@ int main(int argc, string_t argv[]){
 			case PLML_TYPE_HEADER:
 				printf("Header\n\n");
 				break;
+			case PLML_TYPE_FLOAT:
+				printf("Float\n");
+				printf("Value: %f\n\n", *((double*)value));
 		}
 
 		plMLFreeToken(parsedToken);
